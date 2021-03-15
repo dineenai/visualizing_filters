@@ -1,3 +1,4 @@
+# bash script: filters.sh 
 # Importing libraries
 import torch
 import matplotlib.pyplot as plt
@@ -38,11 +39,15 @@ parser.add_argument('-p', '--print-freq', default=10, type=int,
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
-                    help='use pre-trained model')
+                    help='use pre-trained model')               # 
+parser.add_argument('--save_filter_path', default='/home/ainedineen/blurry_vision/pytorch_untrained_models/imagenet/visualizing_filters/receptive_fields_V1',
+                    type=str, metavar='SAVE_FILTER_PATH',
+                    help='path to save accuracy of model') 
+parser.add_argument('--save_filter_file', default='model_accuracy', type=str, metavar='ACCURACY_FILENAME',
+                    help='filename to save accuracy of model ')                      
 
 
 args = parser.parse_args()
-
 
 # def main_worker(gpu, ngpus_per_node, args):
 
@@ -100,52 +105,74 @@ model.eval()
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+# print(model.children[0])
 # Loading the model
 # resnet = models.resnet50()
 # extractor = Extractor(list(resnet.children()))
-extractor = Extractor(list(model.children()))
+
+# model_children = list(model.children())
+# print(type(model.children()))
+# print(len(list(model.children())))
+
+extractor = Extractor(list(model.modules()))
+
+# print(model.modules())
 
 extractor.activate()
 
 
-# Visualising the filters
+# visualize the first conv layer filters
+# plt.figure(figsize=(20, 17))
+# for i, filter in enumerate(extractor.CNN_weights[0]):
+#     plt.subplot(8, 8, i+1) # (8, 8) because in conv0 we have 7x7 filters and total of 64 (see printed shapes)
+#     plt.imshow(filter[0, :, :].detach(), cmap='gray')
+#     plt.axis('off')
+#     plt.savefig('/home/ainedineen/blurry_vision/pytorch_untrained_models/imagenet/21x21FILTER_TEXT_resnet50_conv1_21.png')
+# plt.show()
+
+# # Visualising the filters
 plt.figure(figsize=(35, 35))
+
 for index, filter in enumerate(extractor.CNN_weights[0]):
-    plt.subplot(8, 8, index + 1)
-    plt.imshow(filter[0, :, :].detach(), cmap='gray')
+    plt.subplot(8, 8, index + 1) 
+    plt.imshow(filter[0, :, :].cpu().detach().numpy(), cmap='gray')
     plt.axis('off')
 
-plt.show()
-plt.savefig('/home/ainedineen/blurry_vision/pytorch_untrained_models/imagenet/visualizing_filters/test_out2.png')
+save_filter=str(args.save_filter_path)+'/RF_conv1_'+str(args.save_filter_file)+'.png'
+
+# plt.show()
+plt.savefig(save_filter)
     # plt.show()
 
 
-# Filter Map
-img = cv.cvtColor(cv.imread('Featuremaps&Filters/img.png'), cv.COLOR_BGR2RGB)
-img = t.Compose([
-    t.ToPILImage(),
-    t.Resize((128, 128)),
-    # t.Grayscale(),
-    t.ToTensor(),
-    t.Normalize(0.5, 0.5)])(img).unsqueeze(0)
+# # Filter Map
+# img = cv.cvtColor(cv.imread('Featuremaps&Filters/img.png'), cv.COLOR_BGR2RGB)
+# img = t.Compose([
+#     t.ToPILImage(),
+#     t.Resize((128, 128)),
+#     # t.Grayscale(),
+#     t.ToTensor(),
+#     t.Normalize(0.5, 0.5)])(img).unsqueeze(0)
+# img.savefig('/home/ainedineen/blurry_vision/pytorch_untrained_models/imagenet/visualizing_filters/test_out10.png')
+  
 
-featuremaps = [extractor.CNN_layers[0](img)]
-for x in range(1, len(extractor.CNN_layers)):
-    featuremaps.append(extractor.CNN_layers[x](featuremaps[-1]))
+# featuremaps = [extractor.CNN_layers[0](img)]
+# for x in range(1, len(extractor.CNN_layers)):
+#     featuremaps.append(extractor.CNN_layers[x](featuremaps[-1]))
 
-# Visualising the featuremaps
-for x in range(len(featuremaps)):
-    plt.figure(figsize=(30, 30))
-    layers = featuremaps[x][0, :, :, :].detach()
-    for i, filter in enumerate(layers):
-        if i == 64:
-            break
-        plt.subplot(8, 8, i + 1)
-        plt.imshow(filter, cmap='gray')
-        plt.axis('off')
+# # Visualising the featuremaps
+# for x in range(len(featuremaps)):
+#     plt.figure(figsize=(30, 30))
+#     layers = featuremaps[x][0, :, :, :].detach()
+#     for i, filter in enumerate(layers):
+#         if i == 64:
+#             break
+#         plt.subplot(8, 8, i + 1)
+#         plt.imshow(filter, cmap='gray')
+#         plt.axis('off')
 
-    # plt.savefig('featuremap%s.png'%(x))
+#     # plt.savefig('featuremap%s.png'%(x))
 
-plt.show()
+# plt.show()
 
 
