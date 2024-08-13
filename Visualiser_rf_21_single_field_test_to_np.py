@@ -131,23 +131,72 @@ plt.figure(figsize=(35, 35))
 
 
 # change CNN_weights[0] to CNN_weights[1] gives completly black fields...
+# presumably this is the layer!
 for index, filter in enumerate(extractor.CNN_weights[0]):
 
-    print(type(filter)) #<class 'torch.Tensor'>
-    print(filter.size()) #torch.Size([3, 21, 21])
+    # print(type(filter)) #<class 'torch.Tensor'>
+    # print(filter.size()) #torch.Size([3, 21, 21])
+    # # print(filter)
+    # print(index)
     # print(filter)
-    print(index)
-    print(filter)
-    print(type(filter))
+    # print(type(filter))
 
 
     # Receptive field as a numpy arrray
     np_arr = filter.cpu().detach().numpy()
-    print(np_arr)
+    # print(np_arr)
     
     # file = 'test/test_'+str(index)+'.npy'
-    file = '/home/ainedineen/blurry_vision/pytorch_untrained_models/imagenet/visualizing_filters/conv1_filters/supRN50_conv1_21_g0_30e_g4_30e_e60_np_arr/supRN50_conv1_21_g0_30e_g4_30e_e60_filter_np_arr_'+str(index)+'.npy'
-    numpy.save(file, np_arr, allow_pickle=True, fix_imports=True)
-    print(np_arr.shape) #(3, 21, 21)
+    
+    parent_outdir = '/home/ainedineen/blurry_vision/pytorch_untrained_models/imagenet/visualizing_filters/conv1_filters'
+    
+    # DONE
+    # supRN50_conv1_21_g0_60e_e60_np_arr
+    # supRN50_conv1_21_g4_60e_e60_np_arr
+    # supRN50_conv1_21_g0_30e_g4_30e_e60_np_arr
+        # /data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30/outmodel/checkpoint_supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30_epoch60.pth.tar
+    # supRN50_conv1_21_g0_30e_g4_30e_e35_np_arr
+        # /data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30/outmodel/checkpoint_supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30_epoch35.pth.tar
+    # supRN50_conv1_21_g4_30e_g0_30e_e35_np_arr
+        # /data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_from_gauss_4_for_30_epoch_to_gauss_0_for_30/outmodel/checkpoint_supervised_resnet50_conv1_21_from_gauss_4_for_30_epoch_to_gauss_0_for_30_epoch35.pth.tar
+    # supRN50_conv1_21_g4_30e_g0_30e_e60_np_arr
+        # /data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_from_gauss_4_for_30_epoch_to_gauss_0_for_30/outmodel/checkpoint_supervised_resnet50_conv1_21_from_gauss_4_for_30_epoch_to_gauss_0_for_30_epoch60.pth.tar
+    # supRN50_conv1_21_g0_60e_e35_np_arr
+        # /data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_gauss_0_for_60_epoch/outmodel/checkpoint_supervised_resnet50_conv1_21_gauss_0_for_60_epoch_epoch35.pth.tar
+    # supRN50_conv1_21_g4_60e_e35_np_arr
+        # /data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_gauss_4_for_60_epoch/outmodel/checkpoint_supervised_resnet50_conv1_21_gauss_4_for_60_epoch_epoch35.pth.tar
+    
+
+    
+    
 
   
+
+    # for epoch in 
+    # Just 2 for now! All eventually!
+    # epochs_to_run = [35, 60]
+    
+    
+    # CHANGE THIS AND PATH ONLY!
+    filter_label = 'supRN50_conv1_21_g0_30e_g4_30e_e35'
+    
+    outdir = os.path.join(parent_outdir, f'{filter_label}_np_arr')
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+        print('Making directory!')
+    else:
+        print('Directory exists!')
+    
+    file = f'{outdir}/{filter_label}_filter_np_arr_'+str(index)+'.npy'
+    numpy.save(file, np_arr, allow_pickle=True, fix_imports=True)
+    print(f'Filter {index}:size - {np_arr.shape} (sanity check: are elenetts 1 and 2 both 21)') #(3, 21, 21)
+
+#   CAUTION: RUN WITH THE CORRECT COMMANT OTHERWISE LOADS RESNET 18!
+# (blurry_vision) ainedineen@cusacklab-lamb00:~/blurry_vision/pytorch_untrained_models/imagenet/visualizing_filters$ python Visualiser_rf_21_single_field_test_to_np.py 
+# => creating model 'resnet18'
+
+
+# python3 Visualiser_rf_21_single_field_test.py --a  'resnet50' --resume "/data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_gauss_0_for_60_epoch/outmodel/checkpoint_supervised_resnet50_conv1_21_gauss_0_for_60_epoch_epoch60.pth.tar"
+# python3 Visualiser_rf_21_single_field_test.py --a  'resnet50' --resume "/data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_gauss_0_for_60_epoch/outmodel/checkpoint_supervised_resnet50_conv1_21_gauss_0_for_60_epoch_epoch60.pth.tar"
+# python3 Visualiser_rf_21_single_field_test.py --a  'resnet50' --resume "/data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30/outmodel/checkpoint_supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30_epoch60.pth.tar"
+# python3 Visualiser_rf_21_single_field_test_to_np.py --a  'resnet50' --resume "/data/blurry_vision_sup_RN50/supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30/outmodel/checkpoint_supervised_resnet50_conv1_21_from_gauss_0_for_30_epoch_to_gauss_4_for_30_epoch35.pth.tar"
